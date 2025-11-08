@@ -7,19 +7,14 @@
 <title>Streaming Player</title>
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css"/>
 <style>
-body, html {margin:0; padding:0; width:100%; height:100%; background:#000; font-family:Arial, sans-serif; overflow:hidden;}
-.container-wrapper {width:100%; height:100%; display:flex; flex-direction:column;}
-.player-container {position:relative; width:100%; flex-grow:1; background:#000;}
-#video-player, .plyr {width:100%!important; height:100%!important;}
-.ad-overlay {position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;}
-#ad-overlay-1 {z-index:11;}
-#ad-overlay-2 {z-index:10;}
-#adblock-warning {display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); color:white; text-align:center; padding-top:50px; font-size:18px; z-index:30;}
-.banner-ad-container {position:absolute; bottom:60px; left:10px; width:300px; height:250px; z-index:5;}
-.plyr--fullscreen-active .banner-ad-container {display:none;}
-.tombol-download {display:block; width:100%; padding:15px; background-color:#007bff; color:#fff; text-align:center; text-decoration:none; font-weight:bold; flex-shrink:0;}
-.tombol-download:hover {background-color:#0056b3;}
-.ad-bait {height:1px; width:1px; visibility:hidden;}
+body, html {
+  margin: 0; padding: 0; width: 100%; height: 100%; background: #000; font-family: Arial, sans-serif; overflow: hidden;
+}
+.container-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; }
+.player-container { position: relative; width: 100%; flex-grow: 1; background: #000; }
+#video-player, .plyr { width: 100% !important; height: 100% !important; }
+.banner-ad-container { position: absolute; bottom: 60px; left: 10px; width: 300px; height: 250px; z-index: 5; }
+.plyr--fullscreen-active .banner-ad-container { display: none; }
 </style>
 </head>
 <body>
@@ -27,10 +22,7 @@ body, html {margin:0; padding:0; width:100%; height:100%; background:#000; font-
 
 <div class="container-wrapper">
   <div class="player-container">
-    <video id="video-player" playsinline controls muted></video>
-    <div id="ad-overlay-1" class="ad-overlay"></div>
-    <div id="ad-overlay-2" class="ad-overlay"></div>
-    <div id="adblock-warning">Matikan AdBlock untuk menonton!</div>
+    <video id="video-player" playsinline muted></video>
     <div class="banner-ad-container">
       <script type="text/javascript">
         atOptions = { 'key' : 'fd71a2f8353ddd1d4906b0e7d7187be2', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };
@@ -46,50 +38,32 @@ const urlParams = new URLSearchParams(window.location.search);
 const videoSource = urlParams.get('s');
 const downloadLink = urlParams.get('d');
 const subSource = urlParams.get('sub');
+const SMARTLINK_URL = urlParams.get('smart') || 'https://example.com/smartlink'; // ganti dengan link smartlink
 const downloadButton = document.getElementById('download-button');
 
-// Download button
-if(downloadLink){ downloadButton.href = downloadLink; } else { downloadButton.style.display = 'none'; }
-
-// Deteksi AdBlock ringan
-function detectAdBlock(callback){
-  let bait = document.createElement('div');
-  bait.className = 'ad-bait';
-  document.body.appendChild(bait);
-  setTimeout(() => {
-    if(bait.offsetHeight === 0){ callback(true); } 
-    else { callback(false); }
-    document.body.removeChild(bait);
-  }, 50);
+if(downloadLink){
+  downloadButton.href = downloadLink;
+} else {
+  downloadButton.style.display = 'none';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  detectAdBlock(isBlocked => {
-    if(isBlocked){
-      document.getElementById('adblock-warning').style.display = 'block';
-      document.getElementById('video-player').style.display = 'none';
-    } else {
-      initializePlayer();
-    }
-  });
-});
+let lastClickTime = 0; // untuk interval smartlink ≥4 detik
 
-function initializePlayer(){
+document.addEventListener('DOMContentLoaded', () => {
   const video = document.getElementById('video-player');
 
-  // Load video
   if(videoSource){
-    video.innerHTML = `<source src="${videoSource}" type="video/mp4"/>`;
+    const sourceElem = document.createElement('source');
+    sourceElem.src = videoSource;
+    sourceElem.type = 'video/mp4';
+    video.appendChild(sourceElem);
   } else {
-    document.getElementById('adblock-warning').innerText = 'Error: Video tidak ditemukan';
-    document.getElementById('adblock-warning').style.display = 'block';
-    video.style.display = 'none';
+    alert('Error: Video tidak ditemukan!');
     return;
   }
 
-  // Subtitle opsional
   if(subSource){
-    let track = document.createElement('track');
+    const track = document.createElement('track');
     track.kind = 'subtitles';
     track.src = subSource;
     track.srclang = 'id';
@@ -100,48 +74,30 @@ function initializePlayer(){
 
   const player = new Plyr('#video-player', {
     muted: true,
+    autoplay: false,
     settings: ['speed','captions'],
     speed: { selected: 1, options: [0.5,1,2,3] },
     controls: ['play','rewind','mute','volume','progress','current-time','duration','captions','settings','fast-forward','fullscreen']
   });
 
-  // Smartlink overlay
-  const AD_LINK_1 = 'https://www.effectivegatecpm.com/vqdxk349?key=0f6beeb0c99fb9e0712c82244ab5443e';
-  const AD_LINK_2 = 'https://www.effectivegatecpm.com/vqdxk349?key=0f6beeb0c99fb9e0712c82244ab5443e';
-  let lastClickTime = 0;
-
-  function handleAdClick(adLink){
+  // Fungsi buka smartlink jika interval ≥4 detik
+  function tryOpenSmartlink() {
     const now = Date.now();
-    if(now - lastClickTime >= 4000){ // minimal 4 detik
-      window.open(adLink,'_blank'); // smartlink dibuka
+    if(now - lastClickTime >= 4000){ // ≥4 detik
+      window.open(SMARTLINK_URL,'_blank');
       lastClickTime = now;
     }
-    // Toggle play/pause video
-    if(player.playing){ player.pause(); } else { player.play(); }
   }
 
-  document.getElementById('ad-overlay-1').addEventListener('click', () => handleAdClick(AD_LINK_1));
-  document.getElementById('ad-overlay-2').addEventListener('click', () => handleAdClick(AD_LINK_2));
+  // Semua interaksi utama memicu smartlink
+  const interactiveEvents = ['play','pause','enterfullscreen','exitfullscreen','ratechange'];
+  interactiveEvents.forEach(evt => {
+    player.on(evt, () => tryOpenSmartlink());
+  });
 
-  // Kontrol overlay dan banner saat video play/pause/fullscreen
-  player.on('play', () => {
-    document.querySelectorAll('.ad-overlay').forEach(el => el.style.display='none');
-  });
-  player.on('pause', () => {
-    if(!player.fullscreen.active){
-      document.querySelectorAll('.ad-overlay').forEach(el => el.style.display='block');
-      document.querySelector('.banner-ad-container').style.display='block';
-    }
-  });
-  player.on('enterfullscreen', () => {
-    document.querySelectorAll('.ad-overlay').forEach(el => el.style.display='block');
-    document.querySelector('.banner-ad-container').style.display='none';
-  });
-  player.on('exitfullscreen', () => {
-    if(player.paused){ document.querySelectorAll('.ad-overlay').forEach(el => el.style.display='block'); }
-    document.querySelector('.banner-ad-container').style.display='block';
-  });
-}
+  // Klik langsung di video juga dihitung
+  video.addEventListener('click', tryOpenSmartlink);
+});
 </script>
 </body>
 </html>
