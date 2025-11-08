@@ -12,31 +12,39 @@ h1 { text-align:center; margin-bottom:20px; }
 .input-group { margin-bottom:20px; }
 .input-group label { display:block; font-weight:bold; margin-bottom:5px; }
 .input-group input { width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; }
-button { width:100%; padding:15px; background:#1abc9c; color:#fff; border:none; border-radius:5px; font-size:16px; cursor:pointer; }
+button { width:100%; padding:15px; background:#1abc9c; color:#fff; border:none; border-radius:5px; font-size:16px; cursor:pointer; margin-top:5px; }
 button:hover { background:#16a085; }
 #result-container { display:none; margin-top:20px; }
 #result { width:100%; height:80px; font-family: monospace; padding:10px; border-radius:5px; border:1px solid #ccc; background:#eee; }
+#copy-btn { width:auto; padding:10px 20px; margin-top:10px; background:#007bff; }
+#copy-btn:hover { background:#0056b3; }
 </style>
 </head>
 <body>
 <div class="container">
 <h1>Generator Embed Player</h1>
+
 <div class="input-group">
-<label for="mp4-link">1. Link Video (.mp4)</label>
+<label for="mp4-link">1. Link Video (.mp4) *</label>
 <input type="text" id="mp4-link" placeholder="https://cdn.provider.com/video.mp4">
 </div>
+
 <div class="input-group">
 <label for="download-link">2. Link Download (Opsional)</label>
 <input type="text" id="download-link" placeholder="https://blogger.com/safelink?file=...">
 </div>
+
 <div class="input-group">
 <label for="sub-link">3. Link Subtitle (.vtt, Opsional)</label>
 <input type="text" id="sub-link" placeholder="https://cdn.provider.com/subtitle.vtt">
 </div>
+
 <button id="generate-btn">GENERATE LINK</button>
+
 <div id="result-container">
 <label for="result">Salin Link Embed:</label>
 <textarea id="result" readonly></textarea>
+<button id="copy-btn">COPY LINK</button>
 </div>
 </div>
 
@@ -46,21 +54,33 @@ document.getElementById('generate-btn').addEventListener('click', () => {
   let download = document.getElementById('download-link').value.trim();
   let sub = document.getElementById('sub-link').value.trim();
 
-  if (!mp4) {
-    alert('Link video wajib diisi!');
+  if(!mp4){
+    alert('Link Video wajib diisi!');
     return;
   }
 
   let params = new URLSearchParams();
-  params.set('s', mp4); // video wajib
-  if (download) params.set('d', download); // download opsional
-  if (sub) params.set('sub', sub); // subtitle opsional
+  params.set('s', mp4);        // video source
+  if(download) params.set('d', download);  // download link opsional
+  if(sub) params.set('sub', sub);          // subtitle opsional
 
   let link = window.location.origin + '/player.html?' + params.toString();
+
+  let resultContainer = document.getElementById('result-container');
   let result = document.getElementById('result');
   result.value = link;
-  document.getElementById('result-container').style.display = 'block';
+  resultContainer.style.display = 'block';
   result.select();
+});
+
+// Tombol Copy Link
+document.getElementById('copy-btn').addEventListener('click', () => {
+  const result = document.getElementById('result');
+  result.select();
+  result.setSelectionRange(0, 99999); // Untuk mobile
+  navigator.clipboard.writeText(result.value)
+    .then(() => alert("Link berhasil disalin!"))
+    .catch(() => alert("Gagal menyalin link."));
 });
 </script>
 </body>
