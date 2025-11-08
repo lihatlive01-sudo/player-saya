@@ -12,12 +12,12 @@ h1 { text-align:center; margin-bottom:20px; }
 .input-group { margin-bottom:20px; }
 .input-group label { display:block; font-weight:bold; margin-bottom:5px; }
 .input-group input { width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; }
-button { width:100%; padding:15px; background:#1abc9c; color:#fff; border:none; border-radius:5px; font-size:16px; cursor:pointer; margin-top:5px; }
+button { width:100%; padding:15px; background:#1abc9c; color:#fff; border:none; border-radius:5px; font-size:16px; cursor:pointer; transition: background 0.3s; }
 button:hover { background:#16a085; }
 #result-container { display:none; margin-top:20px; }
 #result { width:100%; height:80px; font-family: monospace; padding:10px; border-radius:5px; border:1px solid #ccc; background:#eee; }
-#copy-btn { width:auto; padding:10px 20px; margin-top:10px; background:#007bff; }
-#copy-btn:hover { background:#0056b3; }
+.copy-btn { margin-top:10px; padding:10px; background:#007bff; color:#fff; border:none; border-radius:5px; cursor:pointer; font-size:16px; transition: background 0.3s; width:100%; }
+.copy-btn:hover { background:#0056b3; }
 </style>
 </head>
 <body>
@@ -25,7 +25,7 @@ button:hover { background:#16a085; }
 <h1>Generator Embed Player</h1>
 
 <div class="input-group">
-<label for="mp4-link">1. Link Video (.mp4) *</label>
+<label for="mp4-link">1. Link Video (.mp4)</label>
 <input type="text" id="mp4-link" placeholder="https://cdn.provider.com/video.mp4">
 </div>
 
@@ -44,43 +44,51 @@ button:hover { background:#16a085; }
 <div id="result-container">
 <label for="result">Salin Link Embed:</label>
 <textarea id="result" readonly></textarea>
-<button id="copy-btn">COPY LINK</button>
+<button id="copy-btn" class="copy-btn">Copy Link</button>
 </div>
 </div>
 
 <script>
-document.getElementById('generate-btn').addEventListener('click', () => {
-  let mp4 = document.getElementById('mp4-link').value.trim();
-  let download = document.getElementById('download-link').value.trim();
-  let sub = document.getElementById('sub-link').value.trim();
+const generateBtn = document.getElementById('generate-btn');
+const copyBtn = document.getElementById('copy-btn');
+const resultContainer = document.getElementById('result-container');
+const result = document.getElementById('result');
 
-  if(!mp4){
-    alert('Link Video wajib diisi!');
-    return;
-  }
+generateBtn.addEventListener('click', () => {
+    const mp4 = document.getElementById('mp4-link').value.trim();
+    const download = document.getElementById('download-link').value.trim();
+    const sub = document.getElementById('sub-link').value.trim();
 
-  let params = new URLSearchParams();
-  params.set('s', mp4);        // video source
-  if(download) params.set('d', download);  // download link opsional
-  if(sub) params.set('sub', sub);          // subtitle opsional
+    if (!mp4) {
+        alert('Video wajib diisi!');
+        return;
+    }
 
-  let link = window.location.origin + '/player.html?' + params.toString();
+    const params = new URLSearchParams();
+    params.set('s', mp4);
+    if (download) params.set('d', download);
+    if (sub) params.set('sub', sub);
 
-  let resultContainer = document.getElementById('result-container');
-  let result = document.getElementById('result');
-  result.value = link;
-  resultContainer.style.display = 'block';
-  result.select();
+    const link = window.location.origin + '/player.html?' + params.toString();
+    result.value = link;
+    resultContainer.style.display = 'block';
+    result.select();
 });
 
-// Tombol Copy Link
-document.getElementById('copy-btn').addEventListener('click', () => {
-  const result = document.getElementById('result');
-  result.select();
-  result.setSelectionRange(0, 99999); // Untuk mobile
-  navigator.clipboard.writeText(result.value)
-    .then(() => alert("Link berhasil disalin!"))
-    .catch(() => alert("Gagal menyalin link."));
+copyBtn.addEventListener('click', () => {
+    result.select();
+    navigator.clipboard.writeText(result.value).then(() => {
+        // Ubah warna tombol jadi hijau sementara
+        const originalColor = copyBtn.style.background;
+        copyBtn.style.background = '#28a745';
+        copyBtn.textContent = 'Tersalin!';
+        setTimeout(() => {
+            copyBtn.style.background = originalColor;
+            copyBtn.textContent = 'Copy Link';
+        }, 2000);
+    }).catch(err => {
+        console.error('Gagal menyalin: ', err);
+    });
 });
 </script>
 </body>
