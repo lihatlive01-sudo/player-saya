@@ -6,46 +6,182 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Generator Embed Player</title>
 <style>
-body { font-family: Arial, sans-serif; background:#f9f9f9; margin:0; padding:20px; }
-.container { max-width:600px; margin:auto; background:#fff; padding:25px; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
-h1 { text-align:center; margin-bottom:20px; }
-.input-group { margin-bottom:20px; }
-.input-group label { display:block; font-weight:bold; margin-bottom:5px; }
-.input-group input { width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; }
-button { width:100%; padding:15px; background:#1abc9c; color:#fff; border:none; border-radius:5px; font-size:16px; cursor:pointer; transition: background 0.3s; }
-button:hover { background:#16a085; }
-#result-container { display:none; margin-top:20px; }
-#result { width:100%; height:80px; font-family: monospace; padding:10px; border-radius:5px; border:1px solid #ccc; background:#eee; }
-.copy-btn { margin-top:10px; padding:10px; background:#007bff; color:#fff; border:none; border-radius:5px; cursor:pointer; font-size:16px; transition: background 0.3s; width:100%; }
-.copy-btn:hover { background:#0056b3; }
+:root {
+  --bg-dark: #181818;
+  --bg-panel: #242424;
+  --text: #e0e0e0;
+  --accent: #1abc9c;
+  --accent-hover: #16a085;
+  --blue: #007bff;
+  --blue-hover: #0056b3;
+}
+
+/* --- Global --- */
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: var(--bg-dark);
+  color: var(--text);
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* --- Container --- */
+.container {
+  width: 90%;
+  max-width: 600px;
+  background: var(--bg-panel);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  transform: scale(0.95);
+  opacity: 0;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+/* --- Animasi --- */
+@keyframes fadeIn {
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 1px;
+  animation: glowText 2s ease-in-out infinite alternate;
+}
+@keyframes glowText {
+  from { text-shadow: 0 0 5px var(--accent); }
+  to { text-shadow: 0 0 15px var(--accent); }
+}
+
+/* --- Input Group --- */
+.input-group {
+  margin-bottom: 20px;
+  transition: transform 0.2s ease;
+}
+.input-group:hover {
+  transform: translateX(4px);
+}
+.input-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #b0b0b0;
+}
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: #2c2c2c;
+  color: var(--text);
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+.input-group input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  outline: none;
+}
+
+/* --- Buttons --- */
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+#generate-btn {
+  background: var(--accent);
+  color: #000;
+}
+#generate-btn:hover {
+  background: var(--accent-hover);
+  transform: scale(1.03);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.copy-btn {
+  background: var(--blue);
+  color: #fff;
+  margin-top: 10px;
+}
+.copy-btn:hover {
+  background: var(--blue-hover);
+  transform: scale(1.03);
+  box-shadow: 0 0 10px var(--blue);
+}
+
+/* --- Result Area --- */
+#result-container {
+  display: none;
+  margin-top: 25px;
+  animation: fadeUp 0.5s ease forwards;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#result {
+  width: 100%;
+  height: 90px;
+  font-family: monospace;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #2c2c2c;
+  color: #00ffae;
+  box-shadow: inset 0 0 10px rgba(26,188,156,0.3);
+  resize: none;
+  transition: box-shadow 0.3s;
+}
+#result:focus {
+  box-shadow: inset 0 0 15px rgba(26,188,156,0.6);
+  outline: none;
+}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>Generator Embed Player</h1>
+  <h1>Generator Embed Player</h1>
 
-<div class="input-group">
-<label for="mp4-link">1. Link Video (.mp4)</label>
-<input type="text" id="mp4-link" placeholder="https://cdn.provider.com/video.mp4">
-</div>
+  <div class="input-group">
+    <label for="mp4-link">1. Link Video (.mp4)</label>
+    <input type="text" id="mp4-link" placeholder="https://cdn.provider.com/video.mp4">
+  </div>
 
-<div class="input-group">
-<label for="download-link">2. Link Download (Opsional)</label>
-<input type="text" id="download-link" placeholder="https://blogger.com/safelink?file=...">
-</div>
+  <div class="input-group">
+    <label for="download-link">2. Link Download (Opsional)</label>
+    <input type="text" id="download-link" placeholder="https://blogger.com/safelink?file=...">
+  </div>
 
-<div class="input-group">
-<label for="sub-link">3. Link Subtitle (.vtt, Opsional)</label>
-<input type="text" id="sub-link" placeholder="https://cdn.provider.com/subtitle.vtt">
-</div>
+  <div class="input-group">
+    <label for="sub-link">3. Link Subtitle (.vtt, Opsional)</label>
+    <input type="text" id="sub-link" placeholder="https://cdn.provider.com/subtitle.vtt">
+  </div>
 
-<button id="generate-btn">GENERATE LINK</button>
+  <button id="generate-btn">GENERATE LINK</button>
 
-<div id="result-container">
-<label for="result">Salin Link Embed:</label>
-<textarea id="result" readonly></textarea>
-<button id="copy-btn" class="copy-btn">Copy Link</button>
-</div>
+  <div id="result-container">
+    <label for="result">Salin Link Embed:</label>
+    <textarea id="result" readonly></textarea>
+    <button id="copy-btn" class="copy-btn">Copy Link</button>
+  </div>
 </div>
 
 <script>
@@ -72,23 +208,23 @@ generateBtn.addEventListener('click', () => {
     const link = window.location.origin + '/player.html?' + params.toString();
     result.value = link;
     resultContainer.style.display = 'block';
+    resultContainer.style.animation = 'fadeUp 0.5s ease forwards';
     result.select();
 });
 
 copyBtn.addEventListener('click', () => {
     result.select();
     navigator.clipboard.writeText(result.value).then(() => {
-        // Ubah warna tombol jadi hijau sementara
-        const originalColor = copyBtn.style.background;
+        const originalText = copyBtn.textContent;
         copyBtn.style.background = '#28a745';
         copyBtn.textContent = 'Tersalin!';
+        copyBtn.style.boxShadow = '0 0 10px #28a745';
         setTimeout(() => {
-            copyBtn.style.background = originalColor;
-            copyBtn.textContent = 'Copy Link';
+            copyBtn.style.background = '';
+            copyBtn.textContent = originalText;
+            copyBtn.style.boxShadow = '';
         }, 2000);
-    }).catch(err => {
-        console.error('Gagal menyalin: ', err);
-    });
+    }).catch(err => console.error('Gagal menyalin: ', err));
 });
 </script>
 </body>
