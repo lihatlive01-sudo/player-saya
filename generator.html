@@ -26,7 +26,7 @@ button:hover { background:#16a085; }
 <input type="text" id="mp4-link" placeholder="https://cdn.provider.com/video.mp4">
 </div>
 <div class="input-group">
-<label for="download-link">2. Link Download (Safelink Blogger)</label>
+<label for="download-link">2. Link Download (Opsional)</label>
 <input type="text" id="download-link" placeholder="https://blogger.com/safelink?file=...">
 </div>
 <div class="input-group">
@@ -41,19 +41,25 @@ button:hover { background:#16a085; }
 </div>
 
 <script>
-document.getElementById('generate-btn').addEventListener('click',()=>{
+document.getElementById('generate-btn').addEventListener('click', () => {
   let mp4 = document.getElementById('mp4-link').value.trim();
   let download = document.getElementById('download-link').value.trim();
   let sub = document.getElementById('sub-link').value.trim();
-  if(!mp4||!download){alert('Video & Download wajib diisi!');return;}
-  let params=new URLSearchParams();
-  params.set('s',mp4);
-  params.set('d',download);
-  if(sub) params.set('sub',sub);
-  let link=window.location.origin+'/player.html?'+params.toString();
-  let result=document.getElementById('result');
-  result.value=link;
-  document.getElementById('result-container').style.display='block';
+
+  if (!mp4) {
+    alert('Link video wajib diisi!');
+    return;
+  }
+
+  let params = new URLSearchParams();
+  params.set('s', mp4); // video wajib
+  if (download) params.set('d', download); // download opsional
+  if (sub) params.set('sub', sub); // subtitle opsional
+
+  let link = window.location.origin + '/player.html?' + params.toString();
+  let result = document.getElementById('result');
+  result.value = link;
+  document.getElementById('result-container').style.display = 'block';
   result.select();
 });
 </script>
