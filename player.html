@@ -7,24 +7,41 @@
 <title>Streaming Player</title>
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css"/>
 <style>
-body,html{margin:0;padding:0;width:100%;height:100%;background:#000;font-family:Arial, sans-serif;overflow:hidden;}
+body,html{margin:0;padding:0;width:100%;height:100%;background:#000;font-family:Arial,sans-serif;overflow:hidden;}
 .container-wrapper{width:100%;height:100%;display:flex;flex-direction:column;}
 .player-container{position:relative;width:100%;flex-grow:1;background:#000;}
 #video-player,.plyr{width:100%!important;height:100%!important;}
 .tombol-download{display:block;width:100%;padding:15px;background-color:#007bff;color:#fff;text-align:center;text-decoration:none;font-weight:bold;flex-shrink:0;}
 .tombol-download:hover{background-color:#0056b3;}
-#adblock-warning{display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);color:white;text-align:center;padding-top:50px;font-size:18px;z-index:30;}
+.banner-ad-container{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);width:300px;height:250px;z-index:5;}
+.social-bar{position:absolute;top:10px;right:10px;z-index:6;}
+.smartlink-overlay{position:absolute;top:0;left:0;width:100%;height:100%;cursor:pointer;z-index:10;}
 </style>
 </head>
 <body>
 <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 
 <div class="container-wrapper">
-<div class="player-container">
-<video id="video-player" playsinline controls></video>
-<div id="adblock-warning">Matikan AdBlock untuk menonton!</div>
-</div>
-<a href="#" id="download-button" class="tombol-download" target="_blank" rel="noopener noreferrer">DOWNLOAD VIDEO</a>
+  <div class="player-container">
+    <video id="video-player" playsinline controls muted></video>
+    
+    <!-- Overlay Smartlink -->
+    <div id="smartlink-overlay" class="smartlink-overlay"></div>
+    
+    <!-- Banner Ad -->
+    <div class="banner-ad-container">
+      <iframe src="https://www.effectivegatecpm.com/fd71a2f8353ddd1d4906b0e7d7187be2/invoke.html" width="300" height="250" frameborder="0"></iframe>
+    </div>
+    
+    <!-- Social Bar -->
+    <div class="social-bar">
+      <a href="#" style="color:white;margin:0 5px;">FB</a>
+      <a href="#" style="color:white;margin:0 5px;">TW</a>
+      <a href="#" style="color:white;margin:0 5px;">WA</a>
+    </div>
+  </div>
+
+  <a href="#" id="download-button" class="tombol-download" target="_blank" rel="noopener noreferrer">DOWNLOAD VIDEO</a>
 </div>
 
 <script>
@@ -38,42 +55,62 @@ const downloadButton = document.getElementById('download-button');
 if(downloadLink){
   downloadButton.href = downloadLink;
 }else{
-  downloadButton.style.display = 'none';
+  downloadButton.style.display='none';
 }
 
-// Inisialisasi player tanpa terlalu agresif cek AdBlock
-document.addEventListener('DOMContentLoaded', ()=>{
-  initializePlayer();
-});
-
-function initializePlayer(){
-  const video=document.getElementById('video-player');
+document.addEventListener('DOMContentLoaded', () => {
+  const video = document.getElementById('video-player');
+  
   if(!videoSource){
-    document.getElementById('adblock-warning').innerText='Error: Video tidak ditemukan';
-    document.getElementById('adblock-warning').style.display='block';
-    video.style.display='none';
+    video.outerHTML = "<p style='color:white;text-align:center;margin-top:20px;'>Error: Video tidak ditemukan</p>";
     downloadButton.style.display='none';
     return;
   }
 
+  // Source video
   video.innerHTML = `<source src="${videoSource}" type="video/mp4"/>`;
 
+  // Subtitle opsional
   if(subSource){
-    let track=document.createElement('track');
-    track.kind='subtitles';
-    track.src=subSource;
-    track.srclang='id';
-    track.label='Bahasa Indonesia';
-    track.default=true;
+    let track = document.createElement('track');
+    track.kind = 'subtitles';
+    track.src = subSource;
+    track.srclang = 'id';
+    track.label = 'Bahasa Indonesia';
+    track.default = true;
     video.appendChild(track);
   }
 
-  new Plyr('#video-player', {
+  // Inisialisasi Plyr
+  const player = new Plyr('#video-player', {
     settings: ['speed','captions'],
-    speed: {selected:1,options:[0.5,1,2,3]},
+    speed: {selected:1, options:[0.5,1,2,3]},
     controls: ['play','rewind','mute','volume','progress','current-time','duration','captions','settings','fast-forward','fullscreen']
   });
-}
+
+  // Pastikan video mute saat play pertama
+  video.addEventListener('play', () => {
+    if(!video.muted) video.muted = true;
+  });
+
+  // Smartlink overlay
+  const overlay = document.getElementById('smartlink-overlay');
+  const AD_LINK_1 = "https://www.effectivegatecpm.com/vqdxk349?key=0f6beeb0c99fb9e0712c82244ab5443e";
+  const AD_LINK_2 = "https://www.effectivegatecpm.com/vqdxk349?key=0f6beeb0c99fb9e0712c82244ab5443e";
+  let clickCounter = 0;
+  
+  overlay.addEventListener('click', () => {
+    clickCounter++;
+    if(clickCounter % 2 !== 0){
+      window.open(AD_LINK_1,'_blank');
+      if(player.fullscreen.active) player.fullscreen.exit();
+      player.play();
+    } else {
+      if(player.playing) player.pause();
+      else player.play();
+    }
+  });
+});
 </script>
 </body>
 </html>
