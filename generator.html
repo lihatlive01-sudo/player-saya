@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Embed Player</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 800px; margin: auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1 { text-align: center; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .input-group input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { display: block; width: 100%; padding: 15px; background-color: #1abc9c; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button:hover { background-color: #16a085; }
+        #result-container { margin-top: 20px; }
+        #result-container textarea { width: 100%; height: 100px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; background-color: #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generator Embed Player</h1>
+        <div class="input-group">
+            <label for="mp4-link">1. Masukkan Link Video (.mp4):</label>
+            <input type="text" id="mp4-link" placeholder="https://cdn.provider.com/video.mp4" required>
+        </div>
+        <div class="input-group">
+            <label for="download-link">2. Masukkan Link Halaman Download (Shortlink):</label>
+            <input type="text" id="download-link" placeholder="https://.../download.html?file=..." required>
+        </div>
+        <div class="input-group">
+            <label for="sub-link">3. Masukkan Link Subtitle (.vtt) (Opsional):</label>
+            <input type="text" id="sub-link" placeholder="https://cdn.provider.com/subtitle.vtt">
+        </div>
+        <button id="generate-btn">GENERATE EMBED LINK</button>
+        <div id="result-container" style="display: none;">
+            <label for="result">4. Salin Link Embed Anda:</label>
+            <textarea id="result" readonly></textarea>
+        </div>
+    </div>
+    <script>
+        document.getElementById('generate-btn').addEventListener('click', function() {
+            let mp4Link = document.getElementById('mp4-link').value;
+            let downloadLink = document.getElementById('download-link').value;
+            let subLink = document.getElementById('sub-link').value;
+            if (!mp4Link || !downloadLink) {
+                alert('Harap isi Link Video dan Link Download!');
+                return;
+            }
+            let baseUrl = window.location.origin;
+            let params = new URLSearchParams();
+            params.set('s', mp4Link);
+            params.set('d', downloadLink);
+            if (subLink) {
+                params.set('sub', subLink);
+            }
+            let finalEmbedLink = `${baseUrl}/player.html?${params.toString()}`;
+            let resultContainer = document.getElementById('result-container');
+            let resultTextarea = document.getElementById('result');
+            resultTextarea.value = finalEmbedLink;
+            resultContainer.style.display = 'block';
+            resultTextarea.select();
+        });
+    </script>
+</body>
+</html>
