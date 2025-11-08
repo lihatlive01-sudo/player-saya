@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streaming Player</title>
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+  <style>
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; font-family: Arial, sans-serif; overflow: hidden; }
+    .container-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; }
+    .player-container { position: relative; width: 100%; flex-grow: 1; background: #000; }
+    #video-player, .plyr { width: 100% !important; height: 100% !important; }
+    .ad-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; }
+    #ad-overlay-1 { z-index: 11; }
+    #ad-overlay-2 { z-index: 10; }
+    .plyr--playing:not(.plyr--fullscreen-active) .ad-overlay { display: none; }
+    #adblock-warning { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); color: white; text-align: center; padding-top: 50px; font-size: 18px; z-index: 30; }
+    .banner-ad-container { position: absolute; bottom: 60px; left: 10px; width: 300px; height: 250px; z-index: 5; }
+    .plyr--fullscreen-active .banner-ad-container { display: none; }
+    .tombol-download { display: block; width: 100%; padding: 15px; background-color: #007bff; color: #ffffff; text-align: center; text-decoration: none; font-weight: bold; box-sizing: border-box; flex-shrink: 0; }
+    .tombol-download:hover { background-color: #0056b3; }
+    .ad-bait { height: 1px; width: 1px; visibility: hidden; }
+  </style>
+</head>
+<body>
+  <script type='text/javascript' src='//pl27996544.effectivegatecpm.com/f7/92/71/f79271fe9b45c13b24e63a85dff9ac64.js'></script>
+  <div class="container-wrapper">
+    <div class="player-container">
+      <video id="video-player" playsinline controls></video>
+      <div id="ad-overlay-1" class="ad-overlay"></div>
+      <div id="ad-overlay-2" class="ad-overlay"></div>
+      <div id="adblock-warning">Harap matikan Adblock Anda untuk menonton!</div>
+      <div class="banner-ad-container">
+        <script type="text/javascript">
+          atOptions = { 'key' : 'fd71a2f8353ddd1d4906b0e7d7187be2', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/fd71a2f8353ddd1d4906b0e7d7187be2/invoke.js"></script>
+      </div>
+    </div>
+    <a href="#" id="download-button" class="tombol-download" target="_blank" rel="noopener noreferrer">DOWNLOAD VIDEO</a>
+  </div>
+  <script>
+    const AD_LINK_1 = 'https://www.effectivegatecpm.com/vqdxk349?key=0f6beeb0c99fb9e0712c82244ab5443e';
+    const AD_LINK_2 = 'https://www.effectivegatecpm.com/vqdxk349?key=0f6beeb0c99fb9e0712c82244ab5443e'; 
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoSource = urlParams.get('s');
+    const downloadLink = urlParams.get('d');
+    const subSource = urlParams.get('sub');
+    const downloadButton = document.getElementById('download-button');
+    if (downloadLink) { downloadButton.href = downloadLink; } else { downloadButton.style.display = 'none'; }
+    let clickCounter = 0; 
+    document.addEventListener('DOMContentLoaded', () => {
+      let player;
+      let adBait = document.createElement('div');
+      adBait.className = 'ad-bait';
+      document.body.appendChild(adBait);
+      setTimeout(() => {
+        if (adBait.offsetHeight === 0) {
+          document.getElementById('adblock-warning').style.display = 'block';
+          document.getElementById('video-player').style.display = 'none';
+        } else { initializePlayer(); }
+        document.body.removeChild(adBait);
+      }, 100);
+      function initializePlayer() {
+        const videoElement = document.getElementById('video-player');
+        if (videoSource) { videoElement.innerHTML = `<source src="${videoSource}" type="video/mp4" />`; }
+        else {
+          document.getElementById('adblock-warning').innerText = 'Error: Sumber video tidak ditemukan (?s=).';
+          document.getElementById('adblock-warning').style.display = 'block';
+          videoElement.style.display = 'none'; return;
+        }
+        if (subSource) {
+          const track = document.createElement('track');
+          track.kind = 'subtitles';
+          track.src = subSource;
+          track.srclang = 'id';
+          track.label = 'Bahasa Indonesia';
+          track.default = true;
+          videoElement.appendChild(track);
+        }
+        player = new Plyr('#video-player', {
+          settings: ['speed', 'captions'],
+          speed: { selected: 1, options: [0.5, 1, 2, 3] },
+          controls: [ 'play', 'rewind', 'mute', 'volume', 'progress', 'current-time', 'duration', 'captions', 'settings', 'fast-forward', 'fullscreen' ]
+        });
+        function handleAdClick(adLink) {
+          clickCounter++; 
+          if (clickCounter % 2 !== 0) {
+            window.open(adLink, '_blank');
+            if (player.fullscreen.active) { player.fullscreen.exit(); }
+            player.play(); 
+          } else { 
+            if (player.playing) { player.pause(); } else { player.play(); }
+          }
+        }
+        document.getElementById('ad-overlay-1').addEventListener('click', () => handleAdClick(AD_LINK_1));
+        document.getElementById('ad-overlay-2').addEventListener('click', () => handleAdClick(AD_LINK_2));
+        player.on('play', () => { document.querySelectorAll('.ad-overlay').forEach(el => el.style.display = 'none'); });
+        player.on('pause', () => { if (!player.fullscreen.active) { document.querySelectorAll('.ad-overlay').forEach(el => el.style.display = 'block'); document.querySelector('.banner-ad-container').style.display = 'block'; } });
+        player.on('enterfullscreen', () => { document.querySelectorAll('.ad-overlay').forEach(el => el.style.display = 'block'); document.querySelector('.banner-ad-container').style.display = 'none'; });
+        player.on('exitfullscreen', () => { if (player.paused) { document.querySelectorAll('.ad-overlay').forEach(el => el.style.display = 'block'); } document.querySelector('.banner-ad-container').style.display = 'block'; });
+      }
+    });
+  </script>
+</body>
+</html>
